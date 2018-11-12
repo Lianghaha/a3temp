@@ -16,16 +16,11 @@ printindex : printindex.o ${OBJ}
 queryone : queryone.o worker.o ${OBJ}
 	gcc ${FLAGS} -o $@ queryone.o worker.o ${OBJ}
 
-test : test_get_word.c
-	gcc ${FLAGS} -o test freq_list.c worker.c test_get_word.c 
-
 # Separately compile each C file
 %.o : %.c ${HDR}
 	gcc ${FLAGS} -c $<
 
 clean :
 	-rm *.o indexer queryone printindex
-
-
 
 
