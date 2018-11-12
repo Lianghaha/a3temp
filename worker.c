@@ -123,13 +123,11 @@ void run_worker(char *dirname, int in, int out) {
     		if (write(out, &frarr[i], sizeof(FreqRecord)) == -1) {
     			perror("write to pipe");
     		}
-    		printf("\nWritting...\n");
+    		//printf("\nWritting...\n");
     		i++;
     	}
     	write(out, &frarr[i], sizeof(FreqRecord));
-    	printf("Finished writing for word %s\n", word);
+    	printf("\nFinished writing for word %s\n", word);
 
     } 
-    close(in);
-    close(out);
 }
