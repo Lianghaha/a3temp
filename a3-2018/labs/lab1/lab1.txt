@@ -1,0 +1,189 @@
+
+    
+      CSC 209H: Lab 1: Shell Use and Programming
+    
+  
+
+  
+
+
+    
+      Lab 1: Shell Use and Programming
+    
+    
+
+
+
+
+
+
+Due: Electronically, by 11 a.m. on Friday Jan 18, 2013
+
+
+Introduction
+
+The goal of the first lab is to practice a few of the shell commands that you
+have seen so far and to learn a few new ones. To learn how the suggested shell commands work, run man CMD where CMD is the name of the command you want to learn about. 
+
+Remember, the TAs are there to help you.  You should work in pairs and are welcome to ask other student groups for help too.
+
+Shell commands you may find useful today are: 
+
+	cd -- change directory
+	grep -- find a word in one or more files
+	ps -- process status (often run as ps aux for the most information)
+	cut -- extract a column from a file 
+	wc -- count words 
+	sort -- sort a file alphabetically
+	uniq -- remove adjacent duplicate lines
+	basename -- print the last element of a pathname
+	dirname -- print the pathname without the last element 
+
+
+Logging into MarkUs
+
+You will be submitting your lab work directly into MarkUs. To access MarkUs, please use either Firefox or Chrome (not IE or Safari.) Please follow these instructions carefully so that the groups are correctly registered. 
+
+One of the two partners should log into MarkUs with your cdf id and password,
+and select lab1. You will see an option to create a group
+on the right side of the screen. Invite your partner to join your group. Log out
+and allow your partner to log into MarkUs to accept the invitation. Your partner must be registered in the same lab section as you.
+
+Note, only one person can send the invitation.
+
+Getting ready to work
+
+Open a terminal window on your cdf account. Use pwd to display your current/working directory. It should display the absolute path to your home
+directory.
+
+
+Create a directory (mkdir) in your home directory to do your lab work in.  You should name it something identifiable like csc209labs.
+
+Change into the directory you just created to do your work.
+
+Pipes
+
+1. Use a command from the list above, to display all the processes 
+running on the machine.  You may want to ssh into greywolf or redwolf to try this out. (In a shell, type ssh greywolf.cdf.toronto.edu and follow instructions.)
+
+2. Construct a pipeline that displays only the sshd processes running on the machine. You don't need to understand what an sshd 
+process is, just that it is the name of a program that some users will be 
+running.
+
+3. Add to your pipeline so that it counts the number of sshd
+processes and displays the count, not the list of processes. It is ok if your
+solution counts your own process that is searching for the string sshd
+but it is even better if you can write a solution that only counts actual
+sshd processes. But don't spend too much time on this at the expense of
+going on to the next steps of the lab.
+
+4. (optional) Next construct a pipeline that counts the number of unique 
+users that are currently running an sshd process. This can be hard to 
+get exactly correct. If you have a solution that is counting processes that
+grep for the string "sshd" as well as sshd processes themselves, then that
+is good enough to move on to the next step.
+
+
+5. Cut and paste the pipeline you wrote for step 3 (and optionally the
+one for step 4) 
+into a new file called pipes.txt.  There should be no other lines in this file (unless they start which # which indicates a comment.)  
+We will run your file as sh pipes.txt to test your results.
+
+Submit pipes.txt using MarkUs.
+
+Shell program
+
+Shell programs are often used to automate tests. In this
+question we will test the sort program which takes a file as a command
+line argument and writes to standard output. The files in the directory
+tests are to be used as test input to sort.  
+
+First some preparation.  Copy the tests directory to your account using the following command:
+
+cp -r /u/csc209h/winter/pub/lab1/tests ./
+
+Explanation:
+
+	cpcopy
+	-rdo it recursively
+	/u/csc209h/winter/pub/lab1/teststhe absolute path to the directory to copy
+	./current working directory. A single dot . (without the slash) would also work fine.
+
+
+You should now have a directory called tests in your current working directory.
+
+Create a directory called actual.  If you run ls, you should see two directories: actual and tests.
+
+ Write a Bourne shell program called runtests that runs sort
+on each of the files in tests, places the output in file of the same
+name as the input file in a directory called actual.
+Before it runs each test, it will print a message to standard output: 
+Testing TEST, where TEST is replaced by the name of the test file.
+You can assume that the two directories, tests and actual
+exist.
+
+The point of this exercise is to get you to write a simple shell script, get you to think about paths, for loops, and variables.
+
+Note: Here are some reminders about the key points about shell 
+variables that we learned in class last week:
+
+	Variables are almost always either strings, or a space-separated list of strings.
+	When assigning a value to a variable, it has no $ in front of the variable name, but when using a variable, you must have the $ in front of the variable name.  Note that when assigning a value to a variable, there are no spaces between the variable name, the equal sign, and the value.
+
+
+Example:
+
+
+   $ var="hello"   # Assign the value "hello" to the variable var.
+                   # The quotation marks are optional in this case but recommended.
+   $ echo $var     # prints hello.  The use of the $ is required.
+
+
+Here are some ideas to get you started:
+
+     You will need to use an editor to create a file and and save. Try 
+gedit, scite, nedit, or nano if you 
+haven't begun to learn an editor on Unix/Linux yet.
+    
+        Remember that the expression containing a wild card is relative to
+the current directory.  Try typing ls tests/* and 
+        
+        $ tfiles=tests/*
+        $ echo $tfiles
+    
+	
+		Write the for loop that iterates over the files in the tests directory.  Just echo the loop variable in the body of the loop.  Run it.
+	
+	
+	
+		Run the following command on the command line: basename tests/nobel1.  Notice what the output is.
+	
+	 We haven't talked about this much in lecture yet, but you can capture the output of a program and save it in a variable using backquotes.  For example, try  
+        bname=`basename tests/nobel1`
+        echo $bname
+	
+	Ask the TAs for help! That is what they are there for.
+
+
+
+Submit the runtests program using MarkUs. Note that the filename
+has no extensions.
+
+A Second Program:  OPTIONAL
+
+ This second program is optional and will not be marked as part of
+lab 1.
+
+This question requires the use of conditionals and the test 
+command. The evening class has not seen these commands but you are encouraged
+to try this section of the lab if you have extra time. This would also be a
+good question to revisit when you are studying for the midterm test.
+
+You will need to be careful with the paths.  You may find the dirname and/or basename commands useful.
+
+If we were using runtests to really test sort then we would want to compare the actual output to the expected output.  If there was a second directory called expected that contained a files with the same name as those in actual then we could use diff to compare the two files in each test case.
+
+ One thing we might want to do is verify that we have expected output for all of the tests that we want to run.  Write a Bourne shell program called find_missing that prints the name of each file in tests that does not have a matching file in expected.
+
+
+

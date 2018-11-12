@@ -1,0 +1,11 @@
+Contents:
+
+big: contains 11 directories that each contain an index. The files in these
+	directories are books downloaded from the Gutenberg site 
+	(http://www.gutenberg.org)
+
+labs: contains 6 directories with the starter code and handouts for the labs
+	from an old offering of 209. These indexes should be a bit smaller 
+        and more useful for testing.
+
+books: contains a single larger index for the book files in this directory.

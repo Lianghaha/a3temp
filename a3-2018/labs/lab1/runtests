@@ -1,0 +1,10 @@
+#!/bin/sh
+
+for f in tests/*
+do
+    basef=`basename $f`
+    echo "# Testing $basef"
+    sort $f > actual/$basef
+    # students weren't expected to do this last line 
+    diff actual/$basef expected/$basef
+done
