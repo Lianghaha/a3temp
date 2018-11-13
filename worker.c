@@ -13,21 +13,21 @@ char *remove_punc(char *);
 */
 FreqRecord *get_word(char *word, Node *head, char **file_names) {
 	printf("\nIn get_word\n");
-	printf("Word: %s\n", word);
+	//printf("Word: %s\n", word);
 	printf("Getting size...\n");
 	int size = 0;
 	Node* ptr = head;
 	while (ptr != NULL) {
-		printf("In word: %s\n", ptr->word);
+		//printf("In word: %s\n", ptr->word);
 		if (strcmp(word, ptr->word) == 0) {
 			printf("Word matched\n");
 			//Node contain word found
 			int i = 0;
 			while (file_names[i] != NULL) {
-				printf("file_names[i]: %s\n", file_names[i]);
-				printf("freq[i]: %d\n", ptr->freq[i]);
 				if (ptr->freq[i] != 0) {
 					size++;
+					printf("file_names[i]: %s\n", file_names[i]);
+					printf("freq[i]: %d\n", ptr->freq[i]);
 					printf("size up\n");
 				}
 				i++;
@@ -37,21 +37,20 @@ FreqRecord *get_word(char *word, Node *head, char **file_names) {
 	}
 	printf("size: %d\n", size);
 
-	printf("\nGetting FreqRecord...\n");
+	printf("\nGenerating FreqRecord...\n");
 	FreqRecord* frarr = malloc((size + 1) * sizeof(FreqRecord));
 	int index = 0;
 	ptr = head;
 	while (ptr != NULL) {
-		printf("In word: %s\n", ptr->word);
+		//printf("In word: %s\n", ptr->word);
 		if (strcmp(word, ptr->word) == 0) {
 			printf("Word matched\n");
 			//Node contain word found
 			int i = 0;
 			while (file_names[i] != NULL) {
-				printf("file_names[i]: %s\n", file_names[i]);
-				printf("freq[i]: %d\n", ptr->freq[i]);
 				if (ptr->freq[i] != 0) {
-					printf("freq[i] != 0\n");
+					printf("file_names[i]: %s\n", file_names[i]);
+					printf("freq[i]: %d\n", ptr->freq[i]);
 					frarr[index].freq = ptr->freq[i];
 					strncpy(frarr[index].filename, file_names[i], PATHLENGTH);
 					frarr[index].filename[PATHLENGTH - 1] = '\0';
@@ -64,7 +63,6 @@ FreqRecord *get_word(char *word, Node *head, char **file_names) {
 		ptr = ptr->next;
 	}
 
-	//还要对比MAXFILE和size的大小
 	frarr[size].freq = 0; 
 	frarr[size].filename[0] = '\0';
 	
@@ -86,14 +84,13 @@ void print_freq_records(FreqRecord *frp) {
         printf("%d    %s\n", frp[i].freq, frp[i].filename);
         i++;
     }
-    printf("print_freq_records finished\n");
 }
 
 /* Complete this function for Task 2 including writing a better comment.
 */
 
 void run_worker(char *dirname, int in, int out) {
-	printf("\nIn run_worker\n");
+	printf("In run_worker\n");
 	printf("dirname: %s\n", dirname);
 	
 	char index_file[PATHLENGTH];
@@ -111,8 +108,8 @@ void run_worker(char *dirname, int in, int out) {
     Node* head;
     char **filenames = init_filenames();
     read_list(index_file, filenames_file, &head, filenames);
-    printf("display_list: ");
-    display_list(head, filenames);
+    //printf("display_list: \n");
+    //display_list(head, filenames);
 
     char word[MAXWORD];
     while (read(in, word, MAXWORD) > 0) {
@@ -120,6 +117,7 @@ void run_worker(char *dirname, int in, int out) {
     	FreqRecord* frarr = get_word(word, head, filenames);
     	int i = 0;
     	while (frarr[i].freq != 0) {
+    		printf("writing into pipe: %d\n", i);
     		if (write(out, &frarr[i], sizeof(FreqRecord)) == -1) {
     			perror("write to pipe");
     		}
@@ -128,6 +126,6 @@ void run_worker(char *dirname, int in, int out) {
     	}
     	write(out, &frarr[i], sizeof(FreqRecord));
     	printf("\nFinished writing for word %s\n", word);
-
     } 
+    printf("run_worker done\n");
 }
