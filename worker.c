@@ -117,7 +117,7 @@ void run_worker(char *dirname, int in, int out) {
     	FreqRecord* frarr = get_word(word, head, filenames);
     	int i = 0;
     	while (frarr[i].freq != 0) {
-    		printf("writing into pipe: %d\n", i);
+    		printf("\nwriting into pipe: %d\n", i);
     		if (write(out, &frarr[i], sizeof(FreqRecord)) == -1) {
     			perror("write to pipe");
     		}
