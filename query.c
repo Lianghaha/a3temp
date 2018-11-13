@@ -94,11 +94,13 @@ int main(int argc, char **argv) {
             else if (r == 0) {
                 printf("In child process\n");
                 for (int i = 0; i < num_child; i++) {
-                    if ((close(p1[i])) == -1){
-                    perror("close");
-                    }
-                    if ((close(p2[i][0])) == -1){
-                    perror("close");
+                    for (int j = 0; j < 2; j++) {
+                        if ((close(p1[i][j])) == -1){
+                            perror("close");
+                        }
+                        if ((close(p2[i][j])) == -1){
+                            perror("close");
+                        }
                     }
                 } 
                 if ((close(p1[num_child][1])) == -1){
