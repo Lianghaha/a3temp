@@ -1,0 +1,130 @@
+
+    
+      CSC 209H: Lab 5: Makefiles and Memory Leaks
+    
+  
+
+  
+
+
+    
+      Lab 5: Makefiles and Memory Leaks
+    
+    
+
+
+
+
+
+Due: Electronically, by 11 a.m. on Feb 15, 2013
+
+Introduction
+
+This week, we'll practice working with makefiles, as well as finding and fixing malloc-related memory leaks.
+
+Remember, the TAs are there to help you.  You should work in pairs and are welcome to ask other student groups for help.
+
+The C programming concepts you will be using in the lab today are:
+
+header (.h) files
+malloc
+pointers
+
+
+Preparation
+
+Log into cdf and 
+create a new directory for your lab work. 
+Copy the files from /u/csc209h/winter/pub/lab5 into this new directory.
+Create a group on 
+MarkUs with your partner.
+
+
+Examining Dependencies
+
+Use an editor to examine each of the files that you copied above. The files serve as an example of a C program composed of several files. For purposes of understanding how everything fits together, we're interested in the dependencies between files. As you look through the files, determine which files rely on functions or types from other files.
+
+Understanding Linked Lists
+
+The file list.c implements functions for working with linked lists (the associated struct is defined in list.h). A linked list is a chain of nodes connected through next pointers. Unlike arrays (whose size is fixed at compile-time), the number of elements (nodes) in a linked list can change as the program runs. The linked list ends when a node has a null pointer stored in its next member. Here is an example of a linked list with three nodes.
+
+
+
+How could you create such a list? You could start with a NULL pointer, and call add_node three times to add each node to the start of your list. Here's how it's done:
+
+List lst = NULL;
+lst = add_node (lst, 2);
+lst = add_node (lst, 18);
+lst = add_node (lst, 50);
+
+
+The diagrams below show two different ways of depicting the linked list formed by the code above. The first is a more abstract view, while the second shows how the list might appear in memory. 
+
+
+
+
+
+I encourage you to understand the remaining functions in list.c, particularly remove_node.
+
+Using and Modifying a makefile
+
+Run make and see which files are produced. Now run touch
+test1.c and then rerun make. Which files are recompiled? (Using touch on a file that already exists updates the timestamp of that file to the current time, rather than creating a new file.)
+
+
+
+Next, add a rule with the target clean that removes all the .o files
+and the testlist executable.
+
+
+Test your clean target and then run make again to rebuild the files that you deleted.
+
+Fixing Memory Leaks
+
+There are some memory leaks in list.c. Fix them by adding the appropriate
+free call(s). You'll also have to create a function in list.c that deallocates all nodes of a list; call this function as part of your memory cleanup in test1.c.
+ 
+On CDF there is a program called valgrind that you can use to check
+to see if you have fixed the memory leaks. Run it on your program as
+valgrind testlist. Be careful: it only reports on the parts of
+the code that ran, so if you aren't testing the functions with memory leaks,
+it won't report them. Your goal is to get a message like the following from
+valgrind:
+
+
+	==7685== All heap blocks were freed -- no leaks are possible
+
+
+Adding 2 New Tests 
+
+Add two new test functions: test2 and test3. They
+should each go in a separate file, and both test remove_node using different test cases. Follow the pattern established with
+test1. Add the calls to test2 and test3 to testlist. Change your makefile as needed.
+
+Shortening the Makefile (optional)
+
+The make program recognizes some special variables as follows:
+
+ $^ refers to all dependencies (the files or targets to
+the right of the : in the rules) 
+ $&lt; refers only to the first dependency 
+ $@ refers to the target. 
+
+
+Modify the makefile so that it incorporates each of these variables wherever
+possible.
+
+Sometimes, multiple rules are of exactly the same form, except for the name of the file being compiled or the name of the object file being produced. Such rules can be collapsed into a single pattern rule by using the % character to match text (like the * wildcard character in bash). For example, %.c refers to any .c file, and %.o refers to the same name as the corresponding .c file but with a .o extension. If a rule with a specific filename and a pattern rule both match the same file, the more specific rule is used.
+
+
+If you still have time or want more practice before the test, change your
+makefile to use a pattern rule. If you do it right, adding another test should
+require only a tiny change to your makefile, not a new rule.
+
+
+Submitting
+
+Submit all .c and .h files (even those you haven't modified), along with your makefile.
+
+
+
