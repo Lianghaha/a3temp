@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
      * a word from standard input for each index it checks.
      */
 
-    int index = 0;
+    int num_child = 0;
     int p1[MAXWORKERS][2];
     int p2[MAXWORKERS][2];
     struct dirent *dp;
@@ -72,53 +72,60 @@ int main(int argc, char **argv) {
             exit(1);
         }
 
-        int count = 0;
         // Only call run_worker if it is a directory
         // Otherwise ignore it.
         if (S_ISDIR(sbuf.st_mode)) {
-            count++;
-            if (pipe(p1[index]) == -1) {
+            if (pipe(p1[num_child]) == -1) {
                 perror("pipe");
             }
-            if (pipe(p2[index]) == -1) {
+            if (pipe(p2[num_child]) == -1) {
                 perror("pipe");
             }
             int r = fork();
             if (r > 0) {
                 printf("In parent process\n");
-                if ((close(p1[index][0])) == -1){
+                if ((close(p1[num_child][0])) == -1){
                     perror("close");
                 }
-                if ((close(p2[index][1])) == -1){
+                if ((close(p2[num_child][1])) == -1){
                     perror("close");
                 }
             }
             else if (r == 0) {
                 printf("In child process\n");
-                if ((close(p1[index][1])) == -1){
+                for (int i = 0; i < num_child; i++) {
+                    if ((close(p1[i])) == -1){
+                    perror("close");
+                    }
+                    if ((close(p2[i][0])) == -1){
+                    perror("close");
+                    }
+                } 
+                if ((close(p1[num_child][1])) == -1){
                     perror("close");
                 }
-                if ((close(p2[index][0])) == -1){
+                if ((close(p2[num_child][0])) == -1){
                     perror("close");
                 }
-                run_worker(path, p1[index][0], p2[index][1]);
+                run_worker(path, p1[num_child][0], p2[num_child][1]);
                 exit(0);
             } else {
                 perror("fork");
                 exit(1);
             }
         }
-        index++;
+        num_child++;
     }
 
-    char input[MAXWORD];
-    FreqRecord fr;
-    FreqRecord frarr[MAXWORKERS];
-    int frarr_index = 0;
     while (1) {
+        char input[MAXWORD];
+        FreqRecord fr;
+        FreqRecord frarr[MAXWORKERS];
+        int frarr_index = 0;
         fgets(input, MAXWORD, stdin);
         printf("Input: %s\n", input);
-        for (int i = 0; i < 1; i++) {
+        
+        for (int i = 0; i < num_child + 1; i++) {
             printf("writting input\n");
             if (write(p1[i][1], input, MAXWORD) == -1) {
                 perror("write to pipe");
@@ -134,7 +141,6 @@ int main(int argc, char **argv) {
                     break;
                 }
             }
-            printf("reach this line\n");
         }
 
         printf("Final print_freq_records\n");
