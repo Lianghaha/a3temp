@@ -85,6 +85,7 @@ int main(int argc, char **argv) {
             }
             int r = fork();
             if (r > 0) {
+                printf("In parent process\n");
                 if ((close(p1[index][0])) == -1){
                     perror("close");
                 }
@@ -114,19 +115,26 @@ int main(int argc, char **argv) {
     FreqRecord fr;
     FreqRecord frarr[MAXWORKERS];
     int frarr_index = 0;
-    while (fgets(input, MAXWORD, stdin) != NULL) {
+    while (1) {
+        fgets(input, MAXWORD, stdin);
         printf("Input: %s\n", input);
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 1; i++) {
             printf("writting input\n");
             if (write(p1[i][1], input, MAXWORD) == -1) {
                 perror("write to pipe");
             }    
-        }
-
-        for (int i = 0; i < 3; i++) {
-            while (read(p2[index][0], &fr, sizeof(FreqRecord)) > 0) {
-                frarr[frarr_index] = fr;
+            while (1) {
+                read(p2[i][0], &fr, sizeof(FreqRecord));
+                printf("Reading from child process\n");
+                printf("Chile process return filenme: %s\n", fr.filename);
+                if (fr.freq != 0) {
+                    frarr[frarr_index] = fr;
+                    frarr_index++;
+                } else {
+                    break;
+                }
             }
+            printf("reach this line\n");
         }
 
         printf("Final print_freq_records\n");
