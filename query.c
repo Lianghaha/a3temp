@@ -9,6 +9,61 @@
 #include "freq_list.h"
 #include "worker.h"
 
+void perror_and_exit(char* str) {
+    perror(str);
+    exit(1);
+}
+
+int add_sort_records(FreqRecord** frarr_ptr, FreqRecord* fr_ptr, int* num_record_ptr) {
+    int count = 0;
+    if (*num_record_ptr < MAXRECORDS) {
+        count = *num_record_ptr;
+    } else {
+        count = MAXRECORDS;
+    }
+
+    if (count == 0) {
+       //printf("count is 0\n"); 
+       (*frarr_ptr)[count] = *fr_ptr; 
+       (*num_record_ptr)++;
+       //printf("added to first in list, current num_record: %d\n", *num_record_ptr);
+       return 0;
+    }
+
+    // find the index to insert
+    int i = 0;
+    while (i < count)
+    {
+        if ((*fr_ptr).freq <= (*frarr_ptr)[i].freq) {
+            i++;
+        }else {
+            break;
+        }
+    }
+    //printf("index is: %d\n", i);
+    //printf("num_record: %d\n", *num_record_ptr);
+    //printf("count: %d\n", count);
+
+    if (i == count && count < MAXRECORDS) {
+        (*frarr_ptr)[i] = *fr_ptr;
+        //printf("added new fr to position: %d\n", i);
+    }
+    else if (i < count) {
+        FreqRecord temp_curr = (*frarr_ptr)[i];
+        FreqRecord temp_next;
+        (*frarr_ptr)[i] = *fr_ptr;
+        i++;
+        while (i < count + 1) {
+            temp_next = (*frarr_ptr)[i];
+            (*frarr_ptr)[i] = temp_curr;
+            temp_curr = temp_next;
+            i++;
+        }
+    }
+    (*num_record_ptr)++;
+    return 0;
+}
+
 /* A program to model calling run_worker and to test it. Notice that run_worker
  * produces binary output, so the output from this program to STDOUT will 
  * not be human readable.  You will need to work out how to save it and view 
@@ -27,7 +82,7 @@ int main(int argc, char **argv) {
             startdir = optarg;
             break;
         default:
-            fprintf(stderr, "Usage: queryone [-d DIRECTORY_NAME]\n");
+            fprintf(stderr, "Usage: query [-d DIRECTORY_NAME]\n");
             exit(1);
         }
     }
@@ -76,67 +131,97 @@ int main(int argc, char **argv) {
         // Otherwise ignore it.
         if (S_ISDIR(sbuf.st_mode)) {
             if (pipe(p1[num_child]) == -1) {
-                perror("pipe");
+                perror_and_exit("pipe");
             }
             if (pipe(p2[num_child]) == -1) {
-                perror("pipe");
+                perror_and_exit("pipe");
             }
             int r = fork();
             if (r > 0) {
-                printf("In parent process\n");
+                //parent
                 if ((close(p1[num_child][0])) == -1){
-                    perror("close");
+                    perror_and_exit("close");
                 }
                 if ((close(p2[num_child][1])) == -1){
-                    perror("close");
+                    perror_and_exit("close");
                 }
             }
             else if (r == 0) {
-                printf("In child process\n");
+                //child
+                for (int i = 0; i < num_child; i++) {
+                    if ((close(p1[i][1])) == -1){
+                        perror_and_exit("close");
+                    }
+                    if ((close(p2[i][0])) == -1){
+                        perror_and_exit("close");
+                    }
+                }
                 if ((close(p1[num_child][1])) == -1){
-                    perror("close");
+                    perror_and_exit("close");
                 }
                 if ((close(p2[num_child][0])) == -1){
-                    perror("close");
+                    perror_and_exit("close");
                 }
+                
                 run_worker(path, p1[num_child][0], p2[num_child][1]);
+                
+                if ((close(p1[num_child][0])) == -1){
+                    perror_and_exit("close");
+                }
+                if ((close(p2[num_child][1])) == -1){
+                    perror_and_exit("close");
+                }
                 exit(0);
             } else {
-                perror("fork");
-                exit(1);
+                perror_and_exit("fork");
             }
-        }
-        num_child++;
+            num_child++;
+        }      
     }
+    //printf("fork finished, num_child: %d found\n", num_child);
+    //check num_child MAXWORKER
 
     while (1) {
         char input[MAXWORD];
         FreqRecord fr;
-        FreqRecord frarr[MAXWORKERS];
-        int frarr_index = 0;
+
+        //init frarr
+        FreqRecord* frarr;
+        if ((frarr = malloc((MAXRECORDS + 1) * sizeof(FreqRecord))) == NULL) {
+        perror("malloc for init_FreqRecodList");
+        exit(1);
+        }
+
+        int num_record = 0;
         fgets(input, MAXWORD, stdin);
-        printf("Input: %s\n", input);
+        //check error
+        //printf("Input: %s\n", input);
         
-        for (int i = 0; i < num_child + 1; i++) {
-            printf("writting input\n");
+        for (int i = 0; i < num_child; i++) {
+            //printf("writting input from pipe for child #: %d\n", i);
             if (write(p1[i][1], input, MAXWORD) == -1) {
-                perror("write to pipe");
-            }    
+                perror_and_exit("write to pipe");
+            }
+        }
+        for (int i = 0; i < num_child; i++) {
+            //printf("reading output to pipe for child #: %d\n", i);
             while (1) {
                 read(p2[i][0], &fr, sizeof(FreqRecord));
-                printf("Reading from child process\n");
-                printf("Chile process return filenme: %s\n", fr.filename);
+                //printf("Chile process #: %d, return filenme: %s\n", i, fr.filename);
                 if (fr.freq != 0) {
-                    frarr[frarr_index] = fr;
-                    frarr_index++;
+                    add_sort_records(&frarr, &fr, &num_record); 
                 } else {
                     break;
                 }
             }
         }
+        fr.freq = 0;    
+        frarr[num_record] = fr;
 
         printf("Final print_freq_records\n");
         print_freq_records(frarr);
+        free(frarr);
+        //check error
         
     }
 
