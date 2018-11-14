@@ -9,6 +9,50 @@
 
 char *remove_punc(char *);
 
+void add_sort_records(FreqRecord** frarr_ptr, FreqRecord* fr_ptr, int* num_record_ptr) {
+    /*
+    int count = 0;
+    if (*num_record_ptr < MAXRECORDS) {
+        count = *num_record_ptr;
+    } else {
+        count = MAXRECORDS;
+    }
+    */
+
+    // find the index to insert
+    int i = 0;
+    while (i < *num_record_ptr)
+    {
+        if ((*fr_ptr).freq <= (*frarr_ptr)[i].freq) {
+            i++;
+        }else {
+            break;
+        }
+    }
+    //printf("index is: %d\n", i);
+    //printf("num_record: %d\n", *num_record_ptr);
+    //printf("count: %d\n", count);
+
+    if (i == *num_record_ptr) {
+        (*frarr_ptr)[i] = *fr_ptr;
+        //printf("added new fr to position: %d\n", i);
+    }
+    else if (i < *num_record_ptr) {
+        FreqRecord temp_curr = (*frarr_ptr)[i];
+        FreqRecord temp_next;
+        (*frarr_ptr)[i] = *fr_ptr;
+        while (i < *num_record_ptr) {
+            i++;
+            temp_next = (*frarr_ptr)[i];
+            (*frarr_ptr)[i] = temp_curr;
+            temp_curr = temp_next;
+        }
+    }
+    if (*num_record_ptr < MAXRECORDS) {
+        (*num_record_ptr)++;
+    }
+}
+
 /* Complete this function for Task 1. Including fixing this comment.
 */
 FreqRecord *get_word(char *word, Node *head, char **file_names) {

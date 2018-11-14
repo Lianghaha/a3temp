@@ -14,56 +14,6 @@ void perror_and_exit(char* str) {
     exit(1);
 }
 
-int add_sort_records(FreqRecord** frarr_ptr, FreqRecord* fr_ptr, int* num_record_ptr) {
-    int count = 0;
-    if (*num_record_ptr < MAXRECORDS) {
-        count = *num_record_ptr;
-    } else {
-        count = MAXRECORDS;
-    }
-
-    if (count == 0) {
-       //printf("count is 0\n"); 
-       (*frarr_ptr)[count] = *fr_ptr; 
-       (*num_record_ptr)++;
-       //printf("added to first in list, current num_record: %d\n", *num_record_ptr);
-       return 0;
-    }
-
-    // find the index to insert
-    int i = 0;
-    while (i < count)
-    {
-        if ((*fr_ptr).freq <= (*frarr_ptr)[i].freq) {
-            i++;
-        }else {
-            break;
-        }
-    }
-    //printf("index is: %d\n", i);
-    //printf("num_record: %d\n", *num_record_ptr);
-    //printf("count: %d\n", count);
-
-    if (i == count && count < MAXRECORDS) {
-        (*frarr_ptr)[i] = *fr_ptr;
-        //printf("added new fr to position: %d\n", i);
-    }
-    else if (i < count) {
-        FreqRecord temp_curr = (*frarr_ptr)[i];
-        FreqRecord temp_next;
-        (*frarr_ptr)[i] = *fr_ptr;
-        i++;
-        while (i < count + 1) {
-            temp_next = (*frarr_ptr)[i];
-            (*frarr_ptr)[i] = temp_curr;
-            temp_curr = temp_next;
-            i++;
-        }
-    }
-    (*num_record_ptr)++;
-    return 0;
-}
-
 /* A program to model calling run_worker and to test it. Notice that run_worker
  * produces binary output, so the output from this program to STDOUT will 
  * not be human readable.  You will need to work out how to save it and view 
@@ -179,7 +129,10 @@ int main(int argc, char **argv) {
         }      
     }
     //printf("fork finished, num_child: %d found\n", num_child);
-    //check num_child MAXWORKER
+    if (num_child > MAXWORKERS) {
+        fprintf(stderr, "Subdirectories more than MAXWORKER\n");
+        exit(1);
+    }
 
     while (1) {
         char input[MAXWORD];
@@ -218,7 +171,7 @@ int main(int argc, char **argv) {
         fr.freq = 0;    
         frarr[num_record] = fr;
 
-        printf("Final print_freq_records\n");
+        //printf("Final print_freq_records\n");
         print_freq_records(frarr);
         free(frarr);
         //check error

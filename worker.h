@@ -14,6 +14,7 @@ typedef struct {
     char filename[PATHLENGTH];
 } FreqRecord;
 
+void add_sort_records(FreqRecord** frarr_ptr, FreqRecord* fr_ptr, int* num_record_ptr);
 FreqRecord *get_word(char *word, Node *head, char **file_names);
 void print_freq_records(FreqRecord *frp);
 void run_worker(char *dirname, int in, int out);
